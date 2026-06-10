@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>めしめし</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fff8f0;
+        --card: #ffffff;
+        --orange: #ff6b2b;
+        --orange-light: #ffe8dc;
+        --text: #2d1b00;
+        --muted: #a08060;
+        --shadow: 0 8px 32px rgba(255, 107, 43, 0.15);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family: "Zen Maru Gothic", sans-serif;
+        background: var(--bg);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 0 2rem;
+        overflow-x: hidden;
+      }
+
+      header {
+        width: 100%;
+        background: var(--orange);
+        padding: 1.2rem 1rem 1rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(255, 107, 43, 0.3);
+      }
+      header h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 0.05em;
+        text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.15);
+      }
+      header p {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 0.2rem;
+      }
+
+      main {
+        width: 100%;
+        max-width: 420px;
+        padding: 1.2rem 1rem 0;
+      }
+
+      /* TODAY'S SPECIAL */
+      .today-card {
+        background: linear-gradient(135deg, #ff6b2b, #ff9500);
+        border-radius: 20px;
+        padding: 1.2rem 1.2rem 1rem;
+        margin-bottom: 1.2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(255, 107, 43, 0.4);
+      }
+      .today-card::before {
+        content: "";
+        position: absolute;
+        right: -20px;
+        top: -20px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+      }
+      .today-card::after {
+        content: "";
+        position: absolute;
+        right: 20px;
+        bottom: -30px;
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+      .today-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.15);
+        padding: 3px 10px;
+        border-radius: 99px;
+        margin-bottom: 0.7rem;
+      }
+      .today-date {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.6rem;
+      }
+      .today-emoji {
+        font-size: 3rem;
+        line-height: 1;
+        margin-bottom: 0.4rem;
+        display: block;
+      }
+      .today-name {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        margin-bottom: 0.3rem;
+      }
+      .today-desc {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.5;
+      }
+      .today-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #fff;
+        color: var(--orange);
+        font-size: 0.65rem;
+        font-weight: 900;
+        padding: 4px 10px;
+        border-radius: 99px;
+        letter-spacing: 0.05em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Dice section */
+      .section-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--orange);
+        letter-spacing: 0.12em;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--orange-light);
+      }
+
+      .dice-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1.2rem;
+      }
+      .dice-btn {
+        width: 120px;
+        height: 120px;
+        border-radius: 24px;
+        background: var(--orange);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        box-shadow:
+          0 7px 0 #c94d18,
+          0 12px 20px rgba(255, 107, 43, 0.3);
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+        position: relative;
+        overflow: hidden;
+      }
+      .dice-btn:active {
+        transform: translateY(6px);
+        box-shadow:
+          0 1px 0 #c94d18,
+          0 4px 10px rgba(255, 107, 43, 0.2);
+      }
+      .dice-btn.rolling {
+        animation: diceShake 0.12s infinite alternate;
+      }
+      @keyframes diceShake {
+        from {
+          transform: rotate(-8deg) scale(0.96);
+        }
+        to {
+          transform: rotate(8deg) scale(1.04);
+        }
+      }
+      .dice-icon {
+        font-size: 2.8rem;
+        line-height: 1;
+      }
+      .dice-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.08em;
+      }
+      .dice-hint {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 0.6rem;
+      }
+
+      .result-card {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+        box-shadow: var(--shadow);
+        border: 2px solid var(--orange-light);
+        text-align: center;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .result-card.pop {
+        animation: cardPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes cardPop {
+        from {
+          transform: scale(0.85);
+          opacity: 0.4;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .result-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 0.3rem;
+      }
+      .result-name {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--text);
+      }
+      .result-sub {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+      }
+      .result-placeholder {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .food-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        margin-bottom: 1.2rem;
+      }
+      .food-chip {
+        background: var(--card);
+        border: 1.5px solid #eee;
+        border-radius: 11px;
+        padding: 9px 9px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text);
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .food-chip:active {
+        background: var(--orange-light);
+        border-color: var(--orange);
+      }
+      .food-chip.highlighted {
+        background: var(--orange-light);
+        border-color: var(--orange);
+        color: var(--orange);
+      }
+      .food-chip-emoji {
+        font-size: 1.2rem;
+      }
+
+      .again-btn {
+        width: 100%;
+        padding: 13px;
+        border-radius: 13px;
+        border: 2px dashed var(--orange);
+        background: transparent;
+        color: var(--orange);
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        transition: background 0.15s;
+      }
+      .again-btn:active {
+        background: var(--orange-light);
+      }
+
+      footer {
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🍽️ めしめし</h1>
+      <p>今日のご飯、サイコロに聞いてみよう</p>
+    </header>
+
+    <main>
+      <!-- TODAY'S SPECIAL -->
+      <div class="today-card" id="today-card">
+        <div class="today-badge">TODAY'S PICK</div>
+        <div class="today-label">📣 今日の編集部おすすめ</div>
+        <div class="today-date" id="today-date"></div>
+        <span class="today-emoji" id="today-emoji"></span>
+        <div class="today-name" id="today-name"></div>
+        <div class="today-desc" id="today-desc"></div>
+      </div>
+
+      <!-- RANDOM DICE -->
+      <div class="section-title">🎲 ランダムで決める</div>
+
+      <div class="dice-wrap">
+        <button class="dice-btn" id="diceBtn" aria-label="サイコロを振る">
+          <div class="dice-icon" id="diceIcon">🎲</div>
+          <div class="dice-label">サイコロを振る</div>
+        </button>
+        <div class="dice-hint">ボタンを押すと今日のメシが決まる</div>
+      </div>
+
+      <div class="result-card" id="resultCard">
+        <div class="result-placeholder">↑ サイコロを振ってね！</div>
+      </div>
+
+      <div class="section-title">メニューリスト</div>
+      <div class="food-grid" id="foodGrid"></div>
+      <button class="again-btn" id="againBtn">🔄 もう一回振る</button>
+    </main>
+
+    <footer>全 <span id="totalCount">0</span> メニューからランダム選択</footer>
+
+    <script>
+      const FOODS = [
+        { e: "🍱", n: "お弁当（コンビニ）" },
+        { e: "🍜", n: "ラーメン" },
+        { e: "🍝", n: "パスタ" },
+        { e: "🍛", n: "カレーライス" },
+        { e: "🍣", n: "お寿司" },
+        { e: "🍔", n: "ハンバーガー" },
+        { e: "🍕", n: "ピザ" },
+        { e: "🥩", n: "焼肉" },
+        { e: "🍤", n: "エビフライ定食" },
+        { e: "🍙", n: "おにぎり" },
+        { e: "🥗", n: "サラダボウル" },
+        { e: "🍞", n: "サンドイッチ" },
+        { e: "🥟", n: "餃子定食" },
+        { e: "🍗", n: "唐揚げ定食" },
+        { e: "🍲", n: "鍋料理" },
+        { e: "🐟", n: "焼き魚定食" },
+        { e: "🍚", n: "親子丼" },
+        { e: "🥚", n: "オムライス" },
+        { e: "🫕", n: "シチュー" },
+        { e: "🍖", n: "ステーキ" },
+        { e: "🌮", n: "タコス" },
+        { e: "🥘", n: "スパニッシュオムレツ" },
+        { e: "🍥", n: "うどん" },
+        { e: "🍡", n: "そば" },
+        { e: "🥡", n: "チャーハン" },
+        { e: "🫔", n: "ブリトー" },
+        { e: "🥙", n: "ケバブ" },
+        { e: "🍢", n: "おでん" },
+        { e: "🧆", n: "コロッケ" },
+        { e: "🫙", n: "天丼" },
+      ];
+
+      // Today's special — changes every day based on date
+      const DAILY_SPECIALS = [
+        {
+          e: "🍜",
+          n: "ラーメン",
+          desc: "寒い日も暑い日も、やっぱりラーメン。今日はスープまで飲み干してほしい。",
+        },
+        {
+          e: "🍛",
+          n: "カレーライス",
+          desc: "スパイスが体を目覚めさせる。今日のあなたにはカレーのパワーが必要だ。",
+        },
+        {
+          e: "🍣",
+          n: "お寿司",
+          desc: "今日はちょっと贅沢してみよう。回転寿司でも立派なごちそう。",
+        },
+        {
+          e: "🍔",
+          n: "ハンバーガー",
+          desc: "両手でガブッといこう。今日はお行儀とか気にしない日。",
+        },
+        {
+          e: "🍝",
+          n: "パスタ",
+          desc: "イタリア人もびっくりの本気パスタ。茹で時間を1分短めに。",
+        },
+        {
+          e: "🥩",
+          n: "焼肉",
+          desc: "肉を食え。今日は肉の日だ。元気が出る。絶対に。",
+        },
+        {
+          e: "🍕",
+          n: "ピザ",
+          desc: "チーズが伸びる瞬間のために生きている。今日はピザで決まり。",
+        },
+        {
+          e: "🍗",
+          n: "唐揚げ定食",
+          desc: "サクサクジューシー。ご飯が止まらなくなる魔法の一皿。",
+        },
+        {
+          e: "🥡",
+          n: "チャーハン",
+          desc: "パラパラ感が命。今日は中華気分で攻めよう。",
+        },
+        {
+          e: "🍚",
+          n: "親子丼",
+          desc: "シンプルだけど最強。卵のとろとろが今日の心を癒してくれる。",
+        },
+        {
+          e: "🥗",
+          n: "サラダボウル",
+          desc: "たまには体に優しくしてあげよう。でもドレッシングは多めで。",
+        },
+        {
+          e: "🍲",
+          n: "鍋料理",
+          desc: "みんなで囲んで食べると3割増しで美味しい。",
+        },
+        {
+          e: "🥚",
+          n: "オムライス",
+          desc: "ケチャップで好きな字を書いてから食べると運気が上がる（当社比）。",
+        },
+        {
+          e: "🍤",
+          n: "エビフライ定食",
+          desc: "サクッとプリプリ。タルタルをたっぷりかけるのが正義。",
+        },
+      ];
+
+      // Pick today's special based on date (same for everyone, changes daily)
+      function getTodaySpecial() {
+        const now = new Date();
+        const dayIndex =
+          Math.floor(now.getTime() / (1000 * 60 * 60 * 24)) %
+          DAILY_SPECIALS.length;
+        return DAILY_SPECIALS[dayIndex];
+      }
+
+      function renderTodaySpecial() {
+        const s = getTodaySpecial();
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日（${"日月火水木金土"[now.getDay()]}）`;
+        document.getElementById("today-date").textContent = dateStr;
+        document.getElementById("today-emoji").textContent = s.e;
+        document.getElementById("today-name").textContent = s.n;
+        document.getElementById("today-desc").textContent = s.desc;
+      }
+
+      // Dice game
+      const diceEmojis = ["🎲", "🎯", "🎰", "🎳", "🎪"];
+      let rolling = false,
+        lastIdx = -1;
+
+      document.getElementById("totalCount").textContent = FOODS.length;
+
+      function buildGrid(highlightIdx) {
+        const grid = document.getElementById("foodGrid");
+        grid.innerHTML = "";
+        FOODS.forEach((f, i) => {
+          const chip = document.createElement("div");
+          chip.className =
+            "food-chip" + (i === highlightIdx ? " highlighted" : "");
+          chip.innerHTML = `<span class="food-chip-emoji">${f.e}</span><span>${f.n}</span>`;
+          chip.addEventListener("click", () => pickSpecific(i));
+          grid.appendChild(chip);
+        });
+      }
+
+      function showResult(idx) {
+        const f = FOODS[idx];
+        const rc = document.getElementById("resultCard");
+        rc.innerHTML = `<div class="result-emoji">${f.e}</div><div class="result-name">${f.n}</div><div class="result-sub">今日はこれで決まり！</div>`;
+        rc.classList.remove("pop");
+        void rc.offsetWidth;
+        rc.classList.add("pop");
+        buildGrid(idx);
+        lastIdx = idx;
+      }
+
+      function pickSpecific(idx) {
+        if (rolling) return;
+        showResult(idx);
+        document.getElementById("diceIcon").textContent = "✅";
+        setTimeout(
+          () => (document.getElementById("diceIcon").textContent = "🎲"),
+          800,
+        );
+      }
+
+      function roll() {
+        if (rolling) return;
+        rolling = true;
+        const btn = document.getElementById("diceBtn");
+        btn.classList.add("rolling");
+        const totalFrames = 22;
+        let frame = 0;
+        const interval = setInterval(() => {
+          const ri = Math.floor(Math.random() * FOODS.length);
+          buildGrid(ri);
+          document.getElementById("diceIcon").textContent =
+            diceEmojis[frame % diceEmojis.length];
+          const f = FOODS[ri];
+          document.getElementById("resultCard").innerHTML =
+            `<div class="result-emoji">${f.e}</div><div class="result-name" style="opacity:0.4">${f.n}</div>`;
+          frame++;
+          if (frame >= totalFrames) {
+            clearInterval(interval);
+            btn.classList.remove("rolling");
+            document.getElementById("diceIcon").textContent = "🎲";
+            let pick;
+            do {
+              pick = Math.floor(Math.random() * FOODS.length);
+            } while (pick === lastIdx && FOODS.length > 1);
+            showResult(pick);
+            rolling = false;
+          }
+        }, 80);
+      }
+
+      document.getElementById("diceBtn").addEventListener("click", roll);
+      document.getElementById("againBtn").addEventListener("click", roll);
+      renderTodaySpecial();
+      buildGrid(-1);
+    </script>
+  </body>
+</html>

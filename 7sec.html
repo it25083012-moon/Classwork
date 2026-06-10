@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7second</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+        background: #050510;
+        color: #fff;
+        min-height: 100vh;
+      }
+      #stars-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+      }
+      #app {
+        padding: 1rem;
+        max-width: 420px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+      .title {
+        text-align: center;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        padding-top: 1rem;
+        color: #fff;
+        text-shadow: 0 0 20px rgba(130, 100, 255, 0.8);
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 1.2rem;
+      }
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+      }
+
+      /* Tab */
+      .tab-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1.2rem;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: #aaa;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .tab-btn.active {
+        background: rgba(107, 53, 200, 0.35);
+        border-color: rgba(200, 160, 255, 0.5);
+        color: #e0c8ff;
+      }
+
+      /* Start */
+      #start-screen {
+        text-align: center;
+        padding: 0.5rem 0;
+      }
+      .mascot {
+        font-size: 56px;
+        line-height: 1;
+        margin: 0.75rem 0;
+      }
+      .big-tagline {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #e8e0ff;
+      }
+      .small-tagline {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 1.2rem;
+      }
+      .start-btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 18px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3a1f8a, #6b35c8);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 0 24px rgba(107, 53, 200, 0.6);
+        transition: transform 0.1s;
+        font-family: inherit;
+      }
+      .start-btn:active {
+        transform: scale(0.97);
+      }
+      .preview-box {
+        font-size: 13px;
+        color: #666;
+        text-align: center;
+      }
+
+      /* Game */
+      #game-screen {
+        text-align: center;
+      }
+      .progress-bar-wrap {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 99px;
+        height: 8px;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: #6b35c8;
+        border-radius: 99px;
+        transition: width 0.1s linear;
+        box-shadow: 0 0 8px rgba(107, 53, 200, 0.8);
+      }
+      .progress-bar.urgent {
+        background: #e24b4a;
+        box-shadow: 0 0 8px rgba(226, 75, 74, 0.8);
+      }
+      .timer-display {
+        font-size: 80px;
+        font-weight: 700;
+        line-height: 1;
+        margin: 0.25rem 0;
+        color: #fff;
+        text-shadow: 0 0 20px rgba(107, 53, 200, 0.8);
+      }
+      .timer-display.urgent {
+        color: #ff6060;
+        text-shadow: 0 0 20px rgba(255, 60, 60, 0.9);
+      }
+      .count-display {
+        font-size: 15px;
+        color: #aaa;
+        margin-bottom: 1rem;
+      }
+      .count-num {
+        font-size: 40px;
+        font-weight: 700;
+        color: #c8a0ff;
+      }
+      .click-area {
+        width: 100%;
+        height: 210px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1.5px solid rgba(107, 53, 200, 0.4);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.1s;
+      }
+      .click-area.flash {
+        background: rgba(107, 53, 200, 0.15);
+        border-color: rgba(200, 160, 255, 0.9);
+        box-shadow:
+          inset 0 0 40px rgba(107, 53, 200, 0.3),
+          0 0 30px rgba(107, 53, 200, 0.5);
+      }
+      .click-area-text {
+        font-size: 13px;
+        color: #555;
+        margin-top: 0.5rem;
+      }
+      .click-emoji {
+        font-size: 64px;
+        transition: transform 0.08s;
+      }
+      .click-emoji.pop {
+        transform: scale(1.4);
+      }
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(200, 160, 255, 0.35);
+        transform: scale(0);
+        animation: rippleAnim 0.5s ease-out forwards;
+        pointer-events: none;
+      }
+      @keyframes rippleAnim {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      /* Result */
+      #result-screen {
+        text-align: center;
+        padding: 0.5rem 0;
+      }
+      .result-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #e8e0ff;
+      }
+      .result-score {
+        font-size: 72px;
+        font-weight: 700;
+        line-height: 1;
+        color: #c8a0ff;
+        text-shadow: 0 0 20px rgba(200, 160, 255, 0.6);
+      }
+      .result-unit {
+        font-size: 15px;
+        color: #888;
+        margin-bottom: 0.75rem;
+      }
+      .result-comment {
+        font-size: 13px;
+        color: #aaa;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .new-record-flash {
+        font-size: 13px;
+        color: #c8a0ff;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: none;
+      }
+      .retry-btn {
+        width: 100%;
+        padding: 13px;
+        font-size: 15px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        cursor: pointer;
+        color: #fff;
+        margin-bottom: 1rem;
+        font-family: inherit;
+      }
+      .retry-btn:active {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      /* Ranking shared */
+      .ranking-section-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 0.6rem;
+        text-align: left;
+        color: #e8e0ff;
+      }
+      .rank-list {
+        list-style: none;
+        margin-bottom: 1rem;
+      }
+      .rank-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .rank-item.is-new {
+        background: rgba(107, 53, 200, 0.25);
+        border-color: rgba(200, 160, 255, 0.5);
+        box-shadow: 0 0 12px rgba(107, 53, 200, 0.3);
+      }
+      .rank-item.is-new .rank-score {
+        color: #c8a0ff;
+      }
+      .rank-item.world {
+        background: rgba(255, 215, 0, 0.06);
+        border-color: rgba(255, 215, 0, 0.2);
+      }
+      .rank-item.world .rank-score {
+        color: #ffd700;
+      }
+      .rank-medal {
+        font-size: 16px;
+        min-width: 22px;
+        text-align: center;
+      }
+      .rank-score {
+        font-size: 18px;
+        font-weight: 700;
+        flex: 1;
+        color: #fff;
+      }
+      .rank-name {
+        font-size: 12px;
+        color: #888;
+        min-width: 70px;
+        text-align: right;
+      }
+      .rank-unit {
+        font-size: 11px;
+        color: #666;
+      }
+      .rank-badge {
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 99px;
+        background: #6b35c8;
+        color: #e8d0ff;
+        font-weight: 600;
+      }
+      .rank-badge.world-badge {
+        background: rgba(255, 215, 0, 0.2);
+        color: #ffd700;
+      }
+      .empty-rank {
+        font-size: 13px;
+        color: #555;
+        text-align: center;
+        padding: 1rem;
+      }
+
+      /* World ranking tab */
+      #world-tab {
+        padding: 0.5rem 0;
+      }
+      .world-header {
+        text-align: center;
+        margin-bottom: 1.2rem;
+      }
+      .world-header-icon {
+        font-size: 2.5rem;
+      }
+      .world-header-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffd700;
+        text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+        margin-top: 0.3rem;
+      }
+      .world-header-sub {
+        font-size: 11px;
+        color: #666;
+        margin-top: 0.2rem;
+      }
+      .your-world-rank {
+        background: rgba(107, 53, 200, 0.2);
+        border: 1px solid rgba(200, 160, 255, 0.3);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      .your-world-rank-label {
+        font-size: 11px;
+        color: #aaa;
+      }
+      .your-world-rank-val {
+        font-size: 28px;
+        font-weight: 700;
+        color: #c8a0ff;
+      }
+      .your-world-rank-score {
+        font-size: 12px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stars-canvas"></canvas>
+    <div id="app">
+      <div class="title">7second</div>
+      <div class="subtitle">7秒で何回クリックできる？</div>
+
+      <!-- HOME TAB -->
+      <div id="home-tab" class="screen active">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('home')">
+            🎮 ゲーム
+          </button>
+          <button class="tab-btn" onclick="switchTab('world')">
+            🌍 世界ランキング
+          </button>
+        </div>
+
+        <div id="start-screen" class="screen active">
+          <div class="mascot">💥</div>
+          <div class="big-tagline">
+            人生で一番無駄な7秒を<br />全力で生きろ。
+          </div>
+          <div class="small-tagline">
+            スマホもPCも対応。指何本使うかはご自由に。
+          </div>
+          <button class="start-btn" id="start-btn">▶ スタート！</button>
+          <br /><br />
+          <div id="ranking-preview"></div>
+          <br />
+          <div class="ranking-section-title">🏆 自分のランキング TOP10</div>
+          <ul class="rank-list" id="my-rank-list-home"></ul>
+        </div>
+
+        <div id="game-screen" class="screen">
+          <div class="progress-bar-wrap">
+            <div
+              class="progress-bar"
+              id="progress-bar"
+              style="width: 100%"
+            ></div>
+          </div>
+          <div class="timer-display" id="timer-display">7.0</div>
+          <div class="count-display">
+            クリック数: <span class="count-num" id="count-num">0</span>
+          </div>
+          <div class="click-area" id="click-area">
+            <div class="click-emoji" id="click-emoji">💥</div>
+            <div class="click-area-text">ここを連打！！！</div>
+          </div>
+        </div>
+
+        <div id="result-screen" class="screen">
+          <div class="result-title">結果発表〜！</div>
+          <div class="result-score" id="result-score">0</div>
+          <div class="result-unit">回 / 7秒</div>
+          <div class="result-comment" id="result-comment"></div>
+          <div class="new-record-flash" id="new-record-flash"></div>
+          <button class="retry-btn" id="retry-btn">
+            もう一回！（懲りない人）
+          </button>
+          <div class="ranking-section-title">🏆 自分のランキング TOP10</div>
+          <ul class="rank-list" id="my-rank-list"></ul>
+        </div>
+      </div>
+
+      <!-- WORLD TAB -->
+      <div id="world-tab" class="screen">
+        <div class="tab-bar">
+          <button class="tab-btn" onclick="switchTab('home')">🎮 ゲーム</button>
+          <button class="tab-btn active" onclick="switchTab('world')">
+            🌍 世界ランキング
+          </button>
+        </div>
+        <div class="world-header">
+          <div class="world-header-icon">🌍</div>
+          <div class="world-header-title">世界ランキング</div>
+          <div class="world-header-sub">世界中のクリッカーたちと競え</div>
+        </div>
+        <div class="your-world-rank" id="your-world-rank-box">
+          <div class="your-world-rank-label">あなたのベスト</div>
+          <div class="your-world-rank-val" id="your-best-display">---</div>
+          <div class="your-world-rank-score" id="your-world-pos">
+            まだ記録なし
+          </div>
+        </div>
+        <div class="ranking-section-title">🥇 世界TOP20</div>
+        <ul class="rank-list" id="world-rank-list"></ul>
+      </div>
+    </div>
+
+    <script>
+      // Stars
+      const canvas = document.getElementById("stars-canvas");
+      const ctx = canvas.getContext("2d");
+      let stars = [],
+        shootingStars = [];
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < 180; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.8 + 0.2,
+            alpha: Math.random() * 0.8 + 0.2,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleDir: Math.random() > 0.5 ? 1 : -1,
+            color: ["#fff", "#c8a0ff", "#a0c8ff", "#ffd0a0"][
+              Math.floor(Math.random() * 4)
+            ],
+          });
+        }
+      }
+      function addShootingStar() {
+        shootingStars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height * 0.5,
+          len: Math.random() * 80 + 40,
+          speed: Math.random() * 6 + 4,
+          alpha: 1,
+          angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+        });
+      }
+      function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach((s) => {
+          s.alpha += s.twinkleSpeed * s.twinkleDir;
+          if (s.alpha >= 1) {
+            s.alpha = 1;
+            s.twinkleDir = -1;
+          }
+          if (s.alpha <= 0.1) {
+            s.alpha = 0.1;
+            s.twinkleDir = 1;
+          }
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = s.alpha;
+          ctx.fill();
+        });
+        shootingStars = shootingStars.filter((ss) => ss.alpha > 0);
+        shootingStars.forEach((ss) => {
+          ctx.beginPath();
+          ctx.moveTo(ss.x, ss.y);
+          ctx.lineTo(
+            ss.x - Math.cos(ss.angle) * ss.len,
+            ss.y - Math.sin(ss.angle) * ss.len,
+          );
+          const g = ctx.createLinearGradient(
+            ss.x,
+            ss.y,
+            ss.x - Math.cos(ss.angle) * ss.len,
+            ss.y - Math.sin(ss.angle) * ss.len,
+          );
+          g.addColorStop(0, `rgba(255,255,255,${ss.alpha})`);
+          g.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.strokeStyle = g;
+          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = ss.alpha;
+          ctx.stroke();
+          ss.x += Math.cos(ss.angle) * ss.speed;
+          ss.y += Math.sin(ss.angle) * ss.speed;
+          ss.alpha -= 0.025;
+        });
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(drawStars);
+      }
+      resizeCanvas();
+      initStars();
+      drawStars();
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        initStars();
+      });
+      setInterval(addShootingStar, 3000);
+
+      // World ranking data (fixed fake data)
+      const WORLD_RANKING = [
+        { name: "🇰🇷 Kim Jinhyuk", score: 187 },
+        { name: "🇯🇵 Tanaka Ryu", score: 174 },
+        { name: "🇺🇸 SpeedKing99", score: 168 },
+        { name: "🇨🇳 LiuFeiClick", score: 161 },
+        { name: "🇧🇷 ClickMaster", score: 155 },
+        { name: "🇩🇪 FastHammer", score: 149 },
+        { name: "🇫🇷 TapDieu", score: 143 },
+        { name: "🇮🇳 RapidRaj", score: 138 },
+        { name: "🇬🇧 FingerStorm", score: 132 },
+        { name: "🇦🇺 OzTapper", score: 126 },
+        { name: "🇲🇽 ClickRapido", score: 121 },
+        { name: "🇰🇷 ParkSeojun", score: 117 },
+        { name: "🇯🇵 Suzuki_Turbo", score: 112 },
+        { name: "🇨🇦 MapleTap", score: 108 },
+        { name: "🇮🇹 ClickVeloce", score: 103 },
+        { name: "🇷🇺 TapБыстро", score: 99 },
+        { name: "🇸🇬 SingaClick", score: 95 },
+        { name: "🇳🇱 DutchSpeed", score: 91 },
+        { name: "🇵🇱 KlikMistrz", score: 87 },
+        { name: "🇿🇦 AfriTapper", score: 83 },
+      ];
+
+      // Game logic
+      const STORAGE_KEY = "seven_second_v3",
+        MAX_RANK = 10,
+        DURATION = 7000;
+      let ranking = [],
+        gameState = "idle",
+        count = 0,
+        startTime = null,
+        timerInterval = null;
+
+      function loadRanking() {
+        try {
+          const r = localStorage.getItem(STORAGE_KEY);
+          if (r) ranking = JSON.parse(r);
+        } catch (e) {
+          ranking = [];
+        }
+      }
+      function saveRanking() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(ranking));
+        } catch (e) {}
+      }
+      function getComment(n) {
+        if (n <= 5) return "😴 寝てた？それとも片手でカップ麺食べながら？";
+        if (n <= 15) return "🐢 まあ…生きてる証拠ではある。";
+        if (n <= 25) return "🙂 普通！でも普通ってなんか悔しくない？";
+        if (n <= 35) return "😤 おっ、ちょっとやる気あるじゃん。";
+        if (n <= 50) return "🔥 これは…指が本気出してる。";
+        if (n <= 70) return "⚡ 変態的な速さ。周りの目が怖い。";
+        if (n <= 100) return "💀 もはや人間じゃない。医師に相談してください。";
+        return "👽 宇宙人ですか？Anthropicに報告します。";
+      }
+      function getMedal(i) {
+        return ["🥇", "🥈", "🥉"][i] || i + 1 + ".";
+      }
+
+      function addScore(s) {
+        ranking.push(s);
+        ranking.sort((a, b) => b - a);
+        if (ranking.length > MAX_RANK) ranking = ranking.slice(0, MAX_RANK);
+        saveRanking();
+        return ranking.indexOf(s);
+      }
+
+      function renderMyRankList(elId, hi) {
+        const el = document.getElementById(elId);
+        if (!ranking.length) {
+          el.innerHTML =
+            '<li class="empty-rank">まだ記録なし。レジェンドになるチャンス！</li>';
+          return;
+        }
+        el.innerHTML = ranking
+          .map(
+            (r, i) => `
+    <li class="rank-item${i === hi ? " is-new" : ""}">
+      <span class="rank-medal">${getMedal(i)}</span>
+      <span class="rank-score">${r}</span>
+      <span class="rank-unit">回</span>
+      ${i === hi ? '<span class="rank-badge">今回</span>' : ""}
+    </li>`,
+          )
+          .join("");
+      }
+
+      function renderWorldRanking() {
+        const myBest = ranking.length ? ranking[0] : 0;
+
+        // Merge user into world list if they have a score
+        let combined = [...WORLD_RANKING];
+        if (myBest > 0) {
+          combined.push({ name: "⭐ あなた", score: myBest, isMe: true });
+          combined.sort((a, b) => b.score - a.score);
+        }
+
+        // Your position
+        const myPos = myBest > 0 ? combined.findIndex((r) => r.isMe) : -1;
+        document.getElementById("your-best-display").textContent =
+          myBest > 0 ? myBest + "回" : "---";
+        document.getElementById("your-world-pos").textContent =
+          myPos >= 0
+            ? `世界 ${myPos + 1}位 / ${combined.length}人中`
+            : "まだ記録なし。ゲームをプレイしてランクイン！";
+
+        const el = document.getElementById("world-rank-list");
+        el.innerHTML = combined
+          .slice(0, 20)
+          .map(
+            (r, i) => `
+    <li class="rank-item${r.isMe ? " is-new" : " world"}">
+      <span class="rank-medal">${getMedal(i)}</span>
+      <span class="rank-score">${r.score}</span>
+      <span class="rank-unit">回</span>
+      <span class="rank-name">${r.name}</span>
+      ${r.isMe ? '<span class="rank-badge">YOU</span>' : ""}
+    </li>`,
+          )
+          .join("");
+      }
+
+      function renderStartPreview() {
+        const el = document.getElementById("ranking-preview");
+        el.innerHTML = ranking.length
+          ? `<div class="preview-box">自己ベスト: <span style="font-size:22px;font-weight:700;color:#c8a0ff">${ranking[0]}回</span></div>`
+          : '<div class="preview-box">ランキングはまだ空っぽ。<br>宇宙初のレジェンドはあなた！</div>';
+      }
+
+      function showGameScreen(id) {
+        document
+          .querySelectorAll("#home-tab .screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      function switchTab(tab) {
+        const homeTab = document.getElementById("home-tab");
+        const worldTab = document.getElementById("world-tab");
+        if (tab === "world") {
+          homeTab.classList.remove("active");
+          worldTab.classList.add("active");
+          renderWorldRanking();
+        } else {
+          worldTab.classList.remove("active");
+          homeTab.classList.add("active");
+        }
+      }
+
+      function spawnRipple(e) {
+        const ca = document.getElementById("click-area");
+        const rect = ca.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        const size = 80,
+          rip = document.createElement("div");
+        rip.className = "ripple";
+        rip.style.cssText = `width:${size}px;height:${size}px;left:${x - size / 2}px;top:${y - size / 2}px;`;
+        ca.appendChild(rip);
+        setTimeout(() => rip.remove(), 500);
+      }
+
+      function startGame() {
+        count = 0;
+        gameState = "playing";
+        startTime = Date.now();
+        document.getElementById("count-num").textContent = "0";
+        document.getElementById("timer-display").textContent = "7.0";
+        document.getElementById("timer-display").classList.remove("urgent");
+        document.getElementById("progress-bar").classList.remove("urgent");
+        document.getElementById("progress-bar").style.width = "100%";
+        showGameScreen("game-screen");
+        timerInterval = setInterval(() => {
+          const elapsed = Date.now() - startTime,
+            remaining = Math.max(0, DURATION - elapsed);
+          document.getElementById("timer-display").textContent = (
+            remaining / 1000
+          ).toFixed(1);
+          document.getElementById("progress-bar").style.width =
+            (remaining / DURATION) * 100 + "%";
+          if (remaining <= 2000) {
+            document.getElementById("timer-display").classList.add("urgent");
+            document.getElementById("progress-bar").classList.add("urgent");
+          }
+          if (remaining <= 0) endGame();
+        }, 50);
+      }
+
+      function handleClick(e) {
+        if (gameState !== "playing") return;
+        e.preventDefault();
+        count++;
+        document.getElementById("count-num").textContent = count;
+        const em = document.getElementById("click-emoji");
+        em.classList.remove("pop");
+        void em.offsetWidth;
+        em.classList.add("pop");
+        setTimeout(() => em.classList.remove("pop"), 80);
+        const ca = document.getElementById("click-area");
+        ca.classList.add("flash");
+        setTimeout(() => ca.classList.remove("flash"), 80);
+        spawnRipple(e);
+        addShootingStar();
+      }
+
+      function endGame() {
+        clearInterval(timerInterval);
+        gameState = "idle";
+        const idx = addScore(count);
+        document.getElementById("result-score").textContent = count;
+        document.getElementById("result-comment").textContent =
+          getComment(count);
+        const flash = document.getElementById("new-record-flash");
+        if (idx >= 0) {
+          flash.style.display = "block";
+          flash.textContent =
+            idx === 0
+              ? "🏆 新記録！宇宙に刻まれた！"
+              : `✨ ${idx + 1}位にランクイン！`;
+        } else {
+          flash.style.display = "none";
+        }
+        renderMyRankList("my-rank-list", idx);
+        renderStartPreview();
+        showGameScreen("result-screen");
+      }
+
+      loadRanking();
+      renderStartPreview();
+      renderMyRankList("my-rank-list-home", -1);
+      document.getElementById("start-btn").addEventListener("click", startGame);
+      document.getElementById("retry-btn").addEventListener("click", () => {
+        showGameScreen("start-screen");
+        renderStartPreview();
+        renderMyRankList("my-rank-list-home", -1);
+      });
+      const ca = document.getElementById("click-area");
+      ca.addEventListener("touchstart", handleClick, { passive: false });
+      ca.addEventListener("mousedown", handleClick);
+    </script>
+  </body>
+</html>
